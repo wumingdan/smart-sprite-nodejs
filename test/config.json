@@ -1,0 +1,5 @@
+﻿{
+    input: './test/css/',
+    output: './test/css/',
+    imageOutput: './test/css/decorator/',
+}

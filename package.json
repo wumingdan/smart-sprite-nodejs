@@ -1,0 +1,13 @@
+﻿{
+    "name": "hm-sprite",
+    "description": "sprite tool - holmes",
+    "version": "0.0.0",
+    "author": {
+        "name": "holmes fe"
+    },
+    "devDependencies": {
+        "cssom": "~0.2.5",
+        "pngjs": "~0.4.0",
+        "commander": "~2.0.0"
+    }
+}
