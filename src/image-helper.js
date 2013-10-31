@@ -70,7 +70,7 @@ exports.read = function (config, styleObjList, callback) {
                     imageInfo.width = this.width;
                     imageInfo.height = this.height;
                     getImageSize(this, function (size) {
-                         console.log(size);
+                        console.log('getting size: ', size, url);
                         imageInfo.size = size;
                         imageInfoCache[url] = imageInfo;
 

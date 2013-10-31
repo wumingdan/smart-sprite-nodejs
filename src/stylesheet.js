@@ -49,7 +49,9 @@ exports.write = function (spriteObjList, outputRoot) {
         spriteObjList = [spriteObjList];
     }
 
-    var fileName, spriteObj, cssContentList = [];
+    var fileName,
+        spriteObj,
+        cssContentList = [];
 
     for (var i in spriteObjList) {
         spriteObj = spriteObjList[i];

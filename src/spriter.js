@@ -82,7 +82,7 @@ var collectStyleRules = function (styleSheet, result) {
 
             // 有背景图片, 就抽取并合并
             if (style['background-image'] &&
-                style['background-image'].indexOf(',') == -1 &&//TODO 忽略掉多背景的属性
+                style['background-image'].indexOf(',') == -1 && //忽略掉多背景的属性
                 (imageUrl = getImageUrl(style['background-image']))
             ) {
                 // 遇到写绝对路径的图片就跳过
@@ -92,7 +92,7 @@ var collectStyleRules = function (styleSheet, result) {
                 }
                 imagePath = path.join(config.input, imageUrl);
                 if (!fs.existsSync(imagePath)) {
-                    // 容错： 如果这个图片是不存在的, 就直接返回了
+                    // 容错： 如果这个图片是不存在的, 就直接返回
                     continue;
                 }
                 // 把用了同一个文件的样式汇集在一起
@@ -119,10 +119,15 @@ var getImageUrl = function (backgroundImage) {
 }
 
 var positionImages = function (styleObjList) {
-    var styleObjArr = [], arr = [], existArr = [], styleObj,
-        maxSize = 60,
+    debugger;
+    var styleObjArr = [],
+        arr = [],
+        existArr = [],
+        styleObj,
+        maxSize = 0,
         packer = new GrowingPacker();
-    //把已经合并了并已输出的图片先排除掉
+
+    // 把已经合并了并已输出的图片先排除掉
     for (var i in styleObjList) {
         styleObj = styleObjList[i];
         if (styleObj.imageInfo.hasDrew) {
@@ -132,7 +137,7 @@ var positionImages = function (styleObjList) {
         }
     }
     // console.log(arr);
-    //如果限制了输出图片的大小, 则进行分组
+    // 如果限制了输出图片的大小, 则进行分组
     if (maxSize) {
         //限制图片大小的算法是:
         //1. 先把图片按从大到小排序
@@ -141,12 +146,17 @@ var positionImages = function (styleObjList) {
         arr.sort(function (a, b) {
             return b.imageInfo.size - a.imageInfo.size;
         });
-        // console.log(arr.length);
-        var total = 0, ret = [];
+
+        console.log(arr.length, ' : arr length');
+
+        var total = 0,
+            ret = [];
+
         for (var i = 0; styleObj = arr[i]; i++) {
             total += styleObj.imageInfo.size;
 
-            // console.log(styleObj.url, total);
+             console.log(styleObj.url, total);
+
             if (total > maxSize) {
                 // console.log('--------------');
                 if (ret.length) {
@@ -200,7 +210,9 @@ var drawImageAndPositionBackground = function (styleObjArr, cssFileName) {
         }
     }
     console.log(styleObjArr.length, cssFileName);
-    debugger;
+
+    //debugger;
+
     utilHelper.forEach(styleObjArr, function (i, arr, next) {
         // console.log(i);
         // console.log('-------------------------------');
@@ -228,8 +240,12 @@ var drawImageAndPositionBackground = function (styleObjArr, cssFileName) {
             goon();
         }, function (count) {
             //没必要输出一张空白图片
+            debugger;
+
             if (count > 0) {
-                imageName = path.resolve(config.imageOutput + imageName);
+                imageName = cssFileName.split('.')[0] + '_sprite.png';
+
+
                 fileHelper.mkdirsSync(path.dirname(imageName));
 
                 imageResult.pack().pipe(fs.createWriteStream(imageName));
@@ -344,9 +360,7 @@ exports.run = function (options) {
 
             var content = styleSheet.read(filePath);
 
-            if (true) {
-
-            }
+            // 获取是否新增sprite-image
 
             var styleObjList = collectStyleRules(css.styleSheet);
 
@@ -357,39 +371,31 @@ exports.run = function (options) {
             delete styleObjList.length;
 
             // 合并，推入当前css文件内容
-            stylesheets.push(css);
+            imageHelper.read(config, styleObjList, function () {
+                var styleObjArr = positionImages(styleObjList);
+                debugger
+                //输出合并的图片 并修改样式表里面的background
+                drawImageAndPositionBackground(styleObjArr, fileName);
 
-            var existObj;
+                //输出修改后的样式表
 
-            for (var url in styleObjList) {
-                var styleObj = styleObjList[url];
-
-                if (existObj = combinedStyleObjList[url]) {
-                    combinedStyleObjList[url].cssRules =
-                        existObj.cssRules.concat(styleObj.cssRules);
-                }
-                else {
-                    combinedStyleObjList[url] = styleObj;
-                }
-
-                combinedStyleObjList.length++;
-            }
-
-            return next();
+                styleSheet.write(css, './test/output/');
+                next();
+            });
         },
         function () {
             // 合并图片
-            delete combinedStyleObjList.length;
-            console.log('--------------');
-            imageHelper.read(config, combinedStyleObjList, function () {
+            //delete combinedStyleObjList.length;
+            //console.log('--------------');
+            //imageHelper.read(config, combinedStyleObjList, function () {
 
-                debugger
+            //    debugger
 
-                //对图片进行坐标定位
-                var styleObjArr = positionImages(combinedStyleObjList);
+            //    //对图片进行坐标定位
+            //    var styleObjArr = positionImages(combinedStyleObjList);
 
-                drawImageAndPositionBackground(styleObjArr, '');
-            });
+            //    drawImageAndPositionBackground(styleObjArr, '');
+            //});
         }
     );
 
