@@ -34,8 +34,8 @@ var setImageWidthHeight = function (styleObj, imageInfo) {
     console.log(imageInfo.width, imageInfo.height, ' - image info');
 
     // TODOTODOTODO margin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    styleObj.w = mw + 20;
-    styleObj.h = mh + 20;
+    styleObj.w = mw + 10;
+    styleObj.h = mh + 10;
 }
 
 var getPxValue = function (cssValue) {
@@ -48,6 +48,7 @@ var getPxValue = function (cssValue) {
 exports.read = function (config, styleObjList, callback) {
 
     utilHelper.forEach(styleObjList, function (url, styleObj, next) {
+
         var imageInfo, content, image, imageFileName;
 
         if (imageInfo = imageInfoCache[url]) {
@@ -57,7 +58,6 @@ exports.read = function (config, styleObjList, callback) {
             styleObj.imageInfo = imageInfo;
             next();
         } else {
-            // content = fs.readFileSync(spriteConfig.input.imageRoot + url);
             imageFileName = config.input + url;
 
             imageInfo = {};

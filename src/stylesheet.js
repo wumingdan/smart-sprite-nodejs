@@ -2,6 +2,7 @@
 
 
 var fs = require('fs');
+var readline = require('readline');
 var path = require('path');
 var util = require('util');
 
@@ -9,6 +10,9 @@ var cssom = require('cssom');
 
 var utilHelper = require('./util-helper');
 var fileHelper = require('./file-helper');
+
+var spriteDefineReg = /\*+\s+(sprite:[^*]*)\*+/;
+
 
 var styleSheetToString = function (styleSheet) {
     var result = "";
@@ -21,6 +25,33 @@ var styleSheetToString = function (styleSheet) {
             result += rule.cssText + '\n';
         }
     }
+    return result;
+};
+
+/**
+ * Method for parsing SmartSprites directives string to Object
+ */
+var parserDirectives = function (directives) {
+    directives = directives.trim().replace(';', ',') || '';
+
+    directives = '{' + directives + '}';
+
+    var directivesResult = JSON.parse(directives);
+
+    var result = {};
+
+    // trim every key and value
+    for (var i in directivesResult) {
+        var key = i.trim();
+        var value = directivesResult[i].trim();
+
+        if (key && value) {
+            result[key] = value;
+        }
+
+        // TODO: error handler
+    }
+
     return result;
 };
 
@@ -44,6 +75,28 @@ exports.getCssRules = function (filePath) {
     return styleSheet.cssRules;
 };
 
+/**
+ * Method for collecting SmartSprites directives from CSS files.
+ * return: array of spriteImageNames
+ */
+exports.getSpriteDefines = function (filePath) {
+    var result = [];
+
+    var rd = readline.createInterface({
+        input: fs.createReadStream(filePath),
+        output: process.stdout,
+        terminal: false
+    });
+
+    rd.on('line', function (line) {
+        if (spriteDefineReg.test(line)) {
+            result.push(parserDirectives(line));
+        }
+    });
+
+    return result;
+}
+
 exports.write = function (spriteObjList, outputRoot) {
     if (!util.isArray(spriteObjList)) {
         spriteObjList = [spriteObjList];
@@ -59,4 +112,4 @@ exports.write = function (spriteObjList, outputRoot) {
 
         fileHelper.writeFileSync(fileName, styleSheetToString(spriteObj.styleSheet), true);
     }
-}
+};

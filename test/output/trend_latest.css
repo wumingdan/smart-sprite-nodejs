@@ -1,0 +1,64 @@
+#SearchWord {margin-right: 50px;}
+.table-filter .group {float: left;}
+.table-filter .group label {margin-right: 10px;}
+.table.table td.detail ul.attributes {display: table-cell; vertical-align: middle; overflow: hidden; color: #999; line-height: 2;}
+.table.table td.detail ul.attributes li {float: left; width: 12em;}
+.table.table td.detail tr.path td {padding: 2px 10px;}
+.table.table td.detail tr.path td a {text-decoration: underline;}
+table.table .table-index, table.table .table-index .td-content {width: 40px;}
+#Visitors2, #VisitFrequency, #VisitPage, #VisitTime {display: inline;}
+#ViewType {display: inline-block; vertical-align: middle;}
+.visitor-type .help {height: 22px; vertical-align: middle;}
+.table-layout-01 thead td {width: 60px;}
+table.table tr.sub-line {background-color: #fff; border: 1px solid #e5e5e5;}
+table.table tr.sub-line .detail {padding: 0;}
+.visitor-detail {overflow: hidden;}
+.visitor-detail .client-info {border-right: 1px solid #e5e5e5; width: 260px;}
+.visitor-detail .user-info {width: auto; margin-left: 260px; min-width: 530px; height: 226px;}
+.visitor-detail .path-info {border-top: 1px solid #e5e5e5; clear: both; width: 100%; padding: 8px 0;}
+.visitor-detail .path-info table {width: 100%;}
+.visitor-detail .path-info table tr:hover {background-color: #fff;}
+.visitor-detail .path-info table td {color: #666;}
+.device-info {border-bottom: 1px solid #e5e5e5; height: 120px;}
+.browser-info {height: 105px;}
+.browser-icon {width: 105px; height: 80px; margin: 20px 0 0;}
+.browser-icon div {width: 79px; height: 79px; margin: 0 auto;}
+.device-icon {width: 105px; height: 100px; margin: 20px 0 0;}
+.device-icon div {width: 100px; height: 100px; margin: 0 auto;}
+.browser-data {display: table; width: 155px; height: 100px; overflow: hidden;}
+.device-data {display: table; width: 155px; height: 120px; overflow: hidden;}
+.visitor-detail .browser-info .chrome {background: transparent url(./test/css/decorator/chrome.png) -460px -99px no-repeat;}
+.visitor-detail .browser-info .diigo {background: transparent url(./test/css/decorator/diigo.png) -99px -318px no-repeat;}
+.visitor-detail .browser-info .dolphin {background: transparent url(./test/css/decorator/dolphin.png) -460px -198px no-repeat;}
+.visitor-detail .browser-info .firefox {background: transparent url(./test/css/decorator/firefox.png) -460px -297px no-repeat;}
+.visitor-detail .browser-info .ie {background: transparent url(./test/css/decorator/ie.png) 0 -417px no-repeat;}
+.visitor-detail .browser-info .liebao {background: transparent url(./test/css/decorator/liebao.png) -99px -417px no-repeat;}
+.visitor-detail .browser-info .maxthon {background: transparent url(./test/css/decorator/maxthon.png) -340px -120px no-repeat;}
+.visitor-detail .browser-info .opera {background: transparent url(./test/css/decorator/opera.png) -340px -219px no-repeat;}
+.visitor-detail .browser-info .other {background: transparent url(./test/css/decorator/other.png) -240px -198px no-repeat;}
+.visitor-detail .browser-info .safari {background: transparent url(./test/css/decorator/safari.png) 0 -318px no-repeat;}
+.visitor-detail .browser-info .sogou {background: transparent url(./test/css/decorator/sogou.png) -198px -417px no-repeat;}
+.visitor-detail .browser-info .taobao {background: transparent url(./test/css/decorator/taobao.png) -198px -318px no-repeat;}
+.visitor-detail .browser-info .theworld {background: transparent url(./test/css/decorator/theworld.png) -297px -318px no-repeat;}
+.visitor-detail .browser-info .uc {background: transparent url(./test/css/decorator/uc.png) -460px 0 no-repeat;}
+.visitor-detail .user-icon {width: 80px; height: 178px; margin: 48px 8px 0 0; background: transparent url(./test/css/decorator/user_icon.png) 0 0 no-repeat;}
+.visitor-detail .device-info .pc {background: transparent url(./test/css/decorator/pc.png) -220px 0 no-repeat;}
+.visitor-detail .device-info .anroid {background: transparent url(./test/css/decorator/anroid.png) 0 -198px no-repeat;}
+.visitor-detail .device-info .ios {background: transparent url(./test/css/decorator/ios.png) -120px -198px no-repeat;}
+.visitor-detail .device-info .other {background: transparent url(./test/css/decorator/other.png) -340px 0 no-repeat;}
+.visitor-detail .device-info .symbian {background: transparent url(./test/css/decorator/symbian.png) -100px 0 no-repeat;}
+.visitor-detail .user-data {color: #333; height: 226px; margin-left: 88px; width: auto; min-width: 420px;}
+.visitor-detail .user-data .visitor-type {height: 100%;}
+.visitor-detail .user-data .visitor-type li {line-height: 37px;}
+.visitor-detail .visitor-code {border: 1px solid #d7d7d7; color: #666; padding: 3px;}
+.visitor-detail .visitor-ip {border: 1px solid #d7d7d7; color: #666; padding: 3px; margin-left: 41px;}
+table.table tbody tr.sub-line:hover {background-color: #fff;}
+.visitor-detail .user-info-anti {width: 58px; color: #666; text-align: center;}
+.visitor-detail .hover {color: #333;}
+.visitor-detail .user-info .button {line-height: 20px; margin-left: 2px;}
+.visitor-detail .user-info .button span {padding: 0 3px;}
+.dialog-content {overflow: hidden; zoom: 1;}
+.anti-confirm-type {color: #333; margin: 20px 0 12px;}
+.anti-confirm-content {zoom: 1; overflow: hidden;}
+.anti-confirm-content .anti-confirm-context {color: #333; line-height: 14px; margin-bottom: 10px;}
+.anti-confirm-content .last {margin-bottom: 30px;}

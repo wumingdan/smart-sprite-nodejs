@@ -327,6 +327,33 @@ var setPxValue = function (rule, attr, newValue) {
     rule[attr] = value;
 }
 
+/**
+ * 往全局sprites对象内添加sprite
+ */
+var addSpriteDefinitions = function (newDefs) {
+    for (var i = 0; i < newDefs.length; i++) {
+        var newSpriteDef = newDefs[i];
+
+        var spriteRef = newSpriteDef['sprite'];
+
+        var isNewSpriteDef = true;
+
+        for (var j = 0; j < sprites.length; j++) {
+            if (sprites[j]['sprite'] == spriteRef) {
+                isNewSpriteDef = false;
+
+                // TODO: warning report, duplicate sprite definition found!
+                // override the old one, onece a new one(duplicate) is found
+                sprites[j] = newSpriteDef;
+            }
+        }
+
+        if (isNewSpriteDef) {
+            sprites.push(newSpriteDef);
+        }
+    }
+};
+
 exports.run = function (options) {
     config = configParser.parse(options);
 
@@ -361,6 +388,8 @@ exports.run = function (options) {
             var content = styleSheet.read(filePath);
 
             // 获取是否新增sprite-image
+            var newSpriteDefinitions = styleSheet.getSpriteDefinitions(filePath);
+            addSpriteDefinitions(newSpriteDefinitions);
 
             var styleObjList = collectStyleRules(css.styleSheet);
 
@@ -373,7 +402,7 @@ exports.run = function (options) {
             // 合并，推入当前css文件内容
             imageHelper.read(config, styleObjList, function () {
                 var styleObjArr = positionImages(styleObjList);
-                debugger
+
                 //输出合并的图片 并修改样式表里面的background
                 drawImageAndPositionBackground(styleObjArr, fileName);
 
