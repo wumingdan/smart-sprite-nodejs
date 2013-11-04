@@ -32,25 +32,28 @@ var styleSheetToString = function (styleSheet) {
  * Method for parsing SmartSprites directives string to Object
  */
 var parserDirectives = function (directives) {
-    directives = directives.trim().replace(';', ',') || '';
-
-    directives = '{' + directives + '}';
-
-    var directivesResult = JSON.parse(directives);
-
     var result = {};
 
-    // trim every key and value
-    for (var i in directivesResult) {
-        var key = i.trim();
-        var value = directivesResult[i].trim();
+    if (!directives) return result;
 
-        if (key && value) {
+    // remove the comment 
+    directives = directives.replace(/\/\*\*|\*\//g, '');
+
+    var parts = directives.split(';');
+
+    for (var i = 0; i < parts.length; i++) {
+        var part = parts[i];
+
+        var chunks = part.split(':');
+
+        if (chunks.length == 2) { 
+            var key = chunks[0].trim();
+            var value = chunks[1].trim();
+
             result[key] = value;
         }
-
-        // TODO: error handler
-    }
+        // TODO: else, warnning report
+    };
 
     return result;
 };
@@ -79,7 +82,7 @@ exports.getCssRules = function (filePath) {
  * Method for collecting SmartSprites directives from CSS files.
  * return: array of spriteImageNames
  */
-exports.getSpriteDefinitions = function (filePath) {
+exports.getSpriteDefinitions = function (filePath, callback) {
     var result = [];
 
     var rd = readline.createInterface({
@@ -94,7 +97,9 @@ exports.getSpriteDefinitions = function (filePath) {
         }
     });
 
-    return result;
+    rd.on('close', function(){
+        callback(result);
+    });  
 }
 
 exports.write = function (spriteObjList, outputRoot) {

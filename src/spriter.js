@@ -26,7 +26,7 @@ var ignoreRepeatRegexp = /^(repeat-x|repeat-y|repeat)$/i;
 
 
 var config;
-var sprites;
+var sprites = [];
 
 var collectStyleRules = function (styleSheet, result) {
     var cssRules = styleSheet.cssRules;
@@ -119,12 +119,11 @@ var getImageUrl = function (backgroundImage) {
 }
 
 var positionImages = function (styleObjList) {
-    debugger;
-    var styleObjArr = [],
+        var styleObjArr = [],
         arr = [],
         existArr = [],
         styleObj,
-        maxSize = 0,
+        //maxSize = 0,
         packer = new GrowingPacker();
 
     // 把已经合并了并已输出的图片先排除掉
@@ -136,45 +135,9 @@ var positionImages = function (styleObjList) {
             arr.push(styleObj);
         }
     }
-    // console.log(arr);
-    // 如果限制了输出图片的大小, 则进行分组
-    if (maxSize) {
-        //限制图片大小的算法是:
-        //1. 先把图片按从大到小排序
-        //2. 顺序叠加图片 size , 超过maxSize 时, 另起一个数组
-        //3. 最终把一个数组, 拆成 N 个 总 szie 小于 maxSize 的数组
-        arr.sort(function (a, b) {
-            return b.imageInfo.size - a.imageInfo.size;
-        });
 
-        console.log(arr.length, ' : arr length');
+    styleObjArr.push(arr);
 
-        var total = 0,
-            ret = [];
-
-        for (var i = 0; styleObj = arr[i]; i++) {
-            total += styleObj.imageInfo.size;
-
-             console.log(styleObj.url, total);
-
-            if (total > maxSize) {
-                // console.log('--------------');
-                if (ret.length) {
-                    styleObjArr.push(ret);
-                    ret = [];
-                    total = styleObj.imageInfo.size;
-                }
-            }
-            ret.push(styleObj);
-        }
-        if (ret.length) {
-            styleObjArr.push(ret);
-        }
-        // console.log(styleObjArr.length, styleObjArr);
-        // console.log('-------------------------------');
-    } else {
-        styleObjArr.push(arr);
-    }
     //packer 算法需要把最大的一个放在首位...
     //排序算法会对结果造成比较大的影响
     for (var j = 0; arr = styleObjArr[j]; j++) {
@@ -188,30 +151,28 @@ var positionImages = function (styleObjList) {
     if (existArr.length) {
         styleObjArr.push(existArr);
     }
-    // console.log(styleObjArr.length, styleObjArr);
-    // console.log('-------------------------------');
+
     return styleObjArr;
 }
 
 
 var drawImageAndPositionBackground = function (styleObjArr, cssFileName) {
-    // console.log(styleObjArr.length, cssFileName);
-    var imageInfo,
-        length = styleObjArr.length;
+    var imageInfo;
+    var length = styleObjArr.length;
 
     if (!styleObjArr[length - 1].root) {
         // 若最后一个元素, 没有root 属性, 表示它的样式都是复用已合并的图片的, 直接替换样式即可
         var arr = styleObjArr.pop();
         length = styleObjArr.length;
+
         for (var j = 0, styleObj; styleObj = arr[j]; j++) {
             imageInfo = styleObj.imageInfo;
             styleObj.fit = imageInfo.fit;
             replaceAndPositionBackground(imageInfo.imageName, styleObj);
         }
     }
-    console.log(styleObjArr.length, cssFileName);
 
-    //debugger;
+    console.log(styleObjArr.length, cssFileName);
 
     utilHelper.forEach(styleObjArr, function (i, arr, next) {
         // console.log(i);
@@ -388,43 +349,38 @@ exports.run = function (options) {
             var content = styleSheet.read(filePath);
 
             // 获取是否新增sprite-image
-            var newSpriteDefinitions = styleSheet.getSpriteDefinitions(filePath);
-            addSpriteDefinitions(newSpriteDefinitions);
+            styleSheet.getSpriteDefinitions(filePath, function(newSpriteDefinitions){
 
-            var styleObjList = collectStyleRules(css.styleSheet);
+                console.log(newSpriteDefinitions, '====')
 
-            if (!styleObjList.length) {
-                return next();
-            }
+                addSpriteDefinitions(newSpriteDefinitions);
 
-            delete styleObjList.length;
+                var styleObjList = collectStyleRules(css.styleSheet);
 
-            // 合并，推入当前css文件内容
-            imageHelper.read(config, styleObjList, function () {
-                var styleObjArr = positionImages(styleObjList);
+                if (!styleObjList.length) {
+                    return next();
+                }
 
-                //输出合并的图片 并修改样式表里面的background
-                drawImageAndPositionBackground(styleObjArr, fileName);
+                delete styleObjList.length;
 
-                //输出修改后的样式表
+                // 处理此css文件内包含的图片
+                imageHelper.read(config, styleObjList, function () {
 
-                styleSheet.write(css, './test/output/');
-                next();
+                    var styleObjArr = positionImages(styleObjList);
+
+                    //输出合并的图片 并修改样式表里面的background
+                    drawImageAndPositionBackground(styleObjArr, fileName);
+
+                    //输出修改后的样式表
+                    styleSheet.write(css, './test/output/');
+                    next();
+                });
             });
+
+            
         },
         function () {
-            // 合并图片
-            //delete combinedStyleObjList.length;
-            //console.log('--------------');
-            //imageHelper.read(config, combinedStyleObjList, function () {
-
-            //    debugger
-
-            //    //对图片进行坐标定位
-            //    var styleObjArr = positionImages(combinedStyleObjList);
-
-            //    drawImageAndPositionBackground(styleObjArr, '');
-            //});
+            console.log('fuck: ', sprites);
         }
     );
 
