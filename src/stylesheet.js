@@ -79,7 +79,7 @@ exports.getCssRules = function (filePath) {
  * Method for collecting SmartSprites directives from CSS files.
  * return: array of spriteImageNames
  */
-exports.getSpriteDefines = function (filePath) {
+exports.getSpriteDefinitions = function (filePath) {
     var result = [];
 
     var rd = readline.createInterface({
