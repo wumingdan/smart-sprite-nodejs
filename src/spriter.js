@@ -12,7 +12,7 @@ var GrowingPacker = require('./GrowingPacker');
 var configParser = require('./config-parser');
 var fileHelper = require('./file-helper');
 var utilHelper = require('./util-helper');
-var styleSheet = require('./stylesheet');
+var ss = require('./stylesheet');
 var bgItpreter = require('./bg-interpreter');
 var imageHelper = require('./image-helper');
 
@@ -28,7 +28,9 @@ var ignoreRepeatRegexp = /^(repeat-x|repeat-y|repeat)$/i;
 var config;
 var sprites = [];
 
-var collectStyleRules = function (styleSheet, result) {
+var collectStyleRules = function (css, result) {
+    var filePath = css.path;
+    var styleSheet = css.styleSheet;
     var cssRules = styleSheet.cssRules;
 
     if (cssRules.length > 0) {
@@ -36,18 +38,7 @@ var collectStyleRules = function (styleSheet, result) {
 
         for (var i = 0; i < cssRules.length; i++) {
             var rule = cssRules[i];
-
-            // @import 样式表
-            if (rule.href && rule.styleSheet) {
-                rule.styleSheet = styleSheet.getStyleSheet(rule.href);
-                collectStyleRules(rule.styleSheet, result);
-                continue;
-            }
-            else if (rule.cssRules && rule.cssRules.length) {
-                // 有子样式，比如@media, @keyframes，递归收集
-                collectStyleRules(rule, result);
-                continue;
-            }
+            var spriteReferenceDirective = {};
 
             style = rule.style;
             if (!style) {
@@ -90,22 +81,39 @@ var collectStyleRules = function (styleSheet, result) {
                     // 这里直接返回了, 因为一个style里面是不会同时存在两个background-image的
                     continue;
                 }
+
                 imagePath = path.join(config.input, imageUrl);
                 if (!fs.existsSync(imagePath)) {
                     // 容错： 如果这个图片是不存在的, 就直接返回
                     continue;
                 }
-                // 把用了同一个文件的样式汇集在一起
-                if (!result[imageUrl]) {
-                    result[imageUrl] = {
-                        url: imageUrl,
-                        cssRules: []
-                    };
-                    result.length++;
-                }
-                result[imageUrl].cssRules.push(style);
+
+                ss.getSpriteReferenceDirective(
+                    filePath,
+                    rule,
+                    function (spriteReferenceDirective) {
+                        console.log(spriteReferenceDirective);
+
+                        // 把用了同一个文件的样式汇集在一起
+                        //if (!result[imageUrl]) {
+                            result[imageUrl] = {
+                                url: imageUrl,
+                                sprite: spriteReferenceDirective,
+                                cssRules: style
+                            };
+                            result.length++;
+                        //}
+                        //result[imageUrl].cssRules.push(style);
+                    }
+                );
             }
         }
+
+        //while (cssRules.length >= result.length) {
+        //    //console.log('总共:', cssRules.length, '； 已完成：', result.length);
+        //};
+        console.log(result, '----');
+
         return result;
     }
 }
@@ -343,19 +351,19 @@ exports.run = function (options) {
 
             var filePath = path.join(input, fileName)
 
-            css.styleSheet = styleSheet.getStyleSheet(filePath);
-            css.cssRules = styleSheet.getCssRules(filePath);
+            css.styleSheet = ss.getStyleSheet(filePath);
+            css.cssRules = ss.getCssRules(filePath);
+            css.path = filePath;
 
-            var content = styleSheet.read(filePath);
+            var content = ss.read(filePath);
 
             // 获取是否新增sprite-image
-            styleSheet.getSpriteDefinitions(filePath, function(newSpriteDefinitions){
+            ss.getSpriteDefinitions(filePath, function(newSpriteDefinitions){
 
-                console.log(newSpriteDefinitions, '====')
-
+                // 添加当前css文件内新产生的sprite definition(s)
                 addSpriteDefinitions(newSpriteDefinitions);
 
-                var styleObjList = collectStyleRules(css.styleSheet);
+                var styleObjList = collectStyleRules(css);
 
                 if (!styleObjList.length) {
                     return next();
@@ -372,7 +380,7 @@ exports.run = function (options) {
                     drawImageAndPositionBackground(styleObjArr, fileName);
 
                     //输出修改后的样式表
-                    styleSheet.write(css, './test/output/');
+                    ss.write(css, './test/output/');
                     next();
                 });
             });

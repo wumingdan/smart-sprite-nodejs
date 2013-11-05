@@ -12,7 +12,7 @@ var utilHelper = require('./util-helper');
 var fileHelper = require('./file-helper');
 
 var spriteDefineReg = /\*+\s+(sprite:[^*]*)\*+/;
-
+var spriteReferenceDirective = /\/\*+\s+sprite-ref:[\s\S]+\*\//;
 
 var styleSheetToString = function (styleSheet) {
     var result = "";
@@ -31,7 +31,7 @@ var styleSheetToString = function (styleSheet) {
 /**
  * Method for parsing SmartSprites directives string to Object
  */
-var parserDirectives = function (directives) {
+var parseDirectives = function (directives) {
     var result = {};
 
     if (!directives) return result;
@@ -93,7 +93,7 @@ exports.getSpriteDefinitions = function (filePath, callback) {
 
     rd.on('line', function (line) {
         if (spriteDefineReg.test(line)) {
-            result.push(parserDirectives(line));
+            result.push(parseDirectives(line));
         }
     });
 
@@ -101,6 +101,29 @@ exports.getSpriteDefinitions = function (filePath, callback) {
         callback(result);
     });  
 }
+
+exports.getSpriteReferenceDirective = function (filePath, rule, callback) {
+    var start = rule.__starts;
+    var end = rule.__ends;
+
+    var readable = fs.createReadStream(filePath, { start: start, end: end });
+
+    readable.on('data', function (chunk) {
+        var cssRuleText = chunk.toString();
+
+        var result;
+
+        // parse /** sprite-ref: common;sprite-margin-bottom:20px;*/
+        if (spriteReferenceDirective.test(cssRuleText)) {
+            var comment = cssRuleText.match(spriteReferenceDirective)[0];
+
+            result = parseDirectives(comment);
+        }
+
+        callback(result);
+    });
+};
+
 
 exports.write = function (spriteObjList, outputRoot) {
     if (!util.isArray(spriteObjList)) {
