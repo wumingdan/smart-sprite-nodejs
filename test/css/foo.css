@@ -4,5 +4,5 @@
 body{
     background-repeat: no-repeat;
     background-color: #115FB6;
-    background-image: url("decorator/os_icons/anroid.png");/** sprite-ref: common;sprite-margin-bottom:20px; */
+    background-image: url("decorator/os_icons/anroid.png");/** sprite-ref: common;sprite-margin-bottom:3px; */
 }

@@ -36,85 +36,83 @@ var collectStyleRules = function (css, result) {
     if (cssRules.length > 0) {
         result = result || { length: 0 };
 
-        for (var i = 0; i < cssRules.length; i++) {
-            var rule = cssRules[i];
-            var spriteReferenceDirective = {};
+        utilHelper.forEach(
+            cssRules,
+            function (i, rule, next) {
+                var spriteReferenceDirective = {};
+                var style = rule.style;
 
-            style = rule.style;
-            if (!style) {
-                // 有可能 `@media`  等中没有 样式， 如： `@media xxx {}`
-                continue;
-            };
-
-            if (style['background-size']) {
-                // 跳过有background-size的样式
-                // 因为backgrond-size不能简写在background里面，而且拆分background之后再组装的话
-                // background就变成再background-size后面了，会导致background-size被background覆盖
-                continue;
-            }
-            if (style.background) {
-                // 有 background 就先拆分
-                bgItpreter.split(style);
-            }
-            // background 定位是 right center bottom 的图片不合并
-            if (ignorePositionRegexp.test(style['background-position-x']) ||
-                ignorePositionRegexp.test(style['background-position-y'])) {
-                bgItpreter.merge(style);
-                continue;
-            }
-            // 显式的使用了平铺的， 也不合并
-            // TODO, 单独合并repeat-x和repeat-y的
-            if (ignoreRepeatRegexp.test(style['background-repeat']) ||
-                ignoreRepeatRegexp.test(style['background-repeat-x']) ||
-                ignoreRepeatRegexp.test(style['background-repeat-y'])) {
-                bgItpreter.merge(style);
-                continue;
-            }
-
-            // 有背景图片, 就抽取并合并
-            if (style['background-image'] &&
-                style['background-image'].indexOf(',') == -1 && //忽略掉多背景的属性
-                (imageUrl = getImageUrl(style['background-image']))
-            ) {
-                // 遇到写绝对路径的图片就跳过
-                if (ignoreNetworkRegexp.test(imageUrl)) {
-                    // 这里直接返回了, 因为一个style里面是不会同时存在两个background-image的
-                    continue;
+                if (!style || style['background-size']) {
+                    // 有可能 `@media`  等中没有 样式， 如： `@media xxx {}`
+                    // 跳过有background-size的样式
+                    // 因为backgrond-size不能简写在background里面，而且拆分background之后再组装的话
+                    // background就变成再background-size后面了，会导致background-size被background覆盖// 
+                    return next();
                 }
 
-                imagePath = path.join(config.input, imageUrl);
-                if (!fs.existsSync(imagePath)) {
-                    // 容错： 如果这个图片是不存在的, 就直接返回
-                    continue;
+                if (style.background) {
+                    // 有 background 就先拆分
+                    bgItpreter.split(style);
                 }
 
-                ss.getSpriteReferenceDirective(
-                    filePath,
-                    rule,
-                    function (spriteReferenceDirective) {
-                        console.log(spriteReferenceDirective);
+                // background 定位是 right center bottom 的图片不合并
+                if (ignorePositionRegexp.test(style['background-position-x']) ||
+                    ignorePositionRegexp.test(style['background-position-y'])) {
+                    bgItpreter.merge(style);
+                    return next();
+                }
+                // 显式的使用了平铺的， 也不合并
+                // TODO, 单独合并repeat-x和repeat-y的
+                if (ignoreRepeatRegexp.test(style['background-repeat']) ||
+                    ignoreRepeatRegexp.test(style['background-repeat-x']) ||
+                    ignoreRepeatRegexp.test(style['background-repeat-y'])) {
+                    bgItpreter.merge(style);
+                    return next();
+                }
 
-                        // 把用了同一个文件的样式汇集在一起
-                        //if (!result[imageUrl]) {
+                // 有背景图片, 就抽取并合并
+                if (style['background-image'] &&
+                    style['background-image'].indexOf(',') == -1 && //忽略掉多背景的属性
+                    (imageUrl = getImageUrl(style['background-image']))
+                ) {
+                    // 遇到写绝对路径的图片就跳过
+                    if (ignoreNetworkRegexp.test(imageUrl)) {
+                        // 这里直接返回了, 因为一个style里面是不会同时存在两个background-image的
+                        return next();
+                    }
+
+                    imagePath = path.join(config.input, imageUrl);
+                    if (!fs.existsSync(imagePath)) {
+                        // 容错： 如果这个图片是不存在的, 就直接返回
+                        return next();
+                    }
+
+                    ss.getSpriteReferenceDirective(
+                        filePath,
+                        rule,
+                        function (spriteReferenceDirective) {
+                            //console.log(spriteReferenceDirective);
+
+                            // 把用了同一个文件的样式汇集在一起
+                            //if (!result[imageUrl]) {
                             result[imageUrl] = {
                                 url: imageUrl,
                                 sprite: spriteReferenceDirective,
                                 cssRules: style
                             };
                             result.length++;
-                        //}
-                        //result[imageUrl].cssRules.push(style);
-                    }
-                );
+                        }
+                    );
+                }
+
+                next();
+            },
+            function (count) {
+                console.log('collectStyleRules ends========: ', result);
+
+                return result;
             }
-        }
-
-        //while (cssRules.length >= result.length) {
-        //    //console.log('总共:', cssRules.length, '； 已完成：', result.length);
-        //};
-        console.log(result, '----');
-
-        return result;
+        );
     }
 }
 
@@ -388,7 +386,7 @@ exports.run = function (options) {
             
         },
         function () {
-            console.log('fuck: ', sprites);
+            //console.log('fuck: ', sprites);
         }
     );
 

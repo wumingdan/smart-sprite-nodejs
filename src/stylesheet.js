@@ -105,11 +105,14 @@ exports.getSpriteDefinitions = function (filePath, callback) {
 exports.getSpriteReferenceDirective = function (filePath, rule, callback) {
     var start = rule.__starts;
     var end = rule.__ends;
+    var length = end - start;
+
 
     var readable = fs.createReadStream(filePath, { start: start, end: end });
 
     readable.on('data', function (chunk) {
         var cssRuleText = chunk.toString();
+        console.log('[][]createReadStream result: ', cssRuleText);
 
         var result;
 
@@ -120,8 +123,16 @@ exports.getSpriteReferenceDirective = function (filePath, rule, callback) {
             result = parseDirectives(comment);
         }
 
-        callback(result);
+        //callback(result);
     });
+
+    var buffer = new Buffer(length);
+
+
+    debugger;
+    fs.readSync(filePath, buffer, 0, length, start);
+
+    console.log('[][]readSync result: ', buffer.toString());
 };
 
 
