@@ -8,6 +8,7 @@
     "devDependencies": {
         "cssom": "~0.2.5",
         "pngjs": "~0.4.0",
-        "commander": "~2.0.0"
+        "commander": "~2.0.0",
+        "imagemagick": "http://github.com/msealand/node-imagemagick.git"
     }
 }

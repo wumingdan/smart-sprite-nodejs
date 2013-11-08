@@ -50,6 +50,11 @@ var parseDirectives = function (directives) {
             var key = chunks[0].trim();
             var value = chunks[1].trim();
 
+            if (value.indexOf('${md5}') != -1) {
+                var text = value.replace('${md5}', '');
+                value = value.replace('${md5}', utilHelper.md5(text));
+            }
+
             result[key] = value;
         }
         // TODO: else, warnning report
@@ -112,8 +117,6 @@ exports.getSpriteReferenceDirective = function (filePath, rule, callback) {
 
     readable.on('data', function (chunk) {
         var cssRuleText = chunk.toString();
-        console.log('[][]createReadStream result: ', cssRuleText);
-
         var result;
 
         // parse /** sprite-ref: common;sprite-margin-bottom:20px;*/
@@ -122,17 +125,8 @@ exports.getSpriteReferenceDirective = function (filePath, rule, callback) {
 
             result = parseDirectives(comment);
         }
-
-        //callback(result);
+        callback(result);
     });
-
-    var buffer = new Buffer(length);
-
-
-    debugger;
-    fs.readSync(filePath, buffer, 0, length, start);
-
-    console.log('[][]readSync result: ', buffer.toString());
 };
 
 

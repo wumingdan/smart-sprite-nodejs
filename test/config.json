@@ -1,5 +1,5 @@
 ﻿{
-    input: './test/css/',
-    output: './test/css/',
-    imageOutput: './test/css/decorator/',
+    'input': 'test/css/',
+    'output': 'test/output/',
+    'imageOutput': 'test/output/'
 }

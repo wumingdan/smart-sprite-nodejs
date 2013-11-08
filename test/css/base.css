@@ -13,11 +13,19 @@
     color: White;
     font-weight: bolder;
     margin-right: 3px;
+    background-position: 0 0;
     background-repeat: no-repeat;
     background-image: url("decorator/view_tab.png");/** sprite-ref: common;sprite-margin-bottom:1px;*/ 
 }
 .header-wrapper .view-tab a.site-center{
     width: 96px;
     background-position: 0 0;
+    background-repeat: no-repeat;
     background-image: url("decorator/view_tab_site_center.png");/** sprite-ref: common;sprite-margin-bottom:2px;*/ 
 }
+
+/*.header-wrapper .view-tab a.site-center{
+    width: 96px;
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    background-image: url("decorator/view_tab_site_center.png");/** sprite-ref: common;sprite-margin-bottom:2px;*/ 

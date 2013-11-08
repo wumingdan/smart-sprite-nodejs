@@ -31,8 +31,6 @@ var setImageWidthHeight = function (styleObj, imageInfo) {
         }
     }
 
-    console.log(imageInfo.width, imageInfo.height, ' - image info');
-
     // TODOTODOTODO margin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     styleObj.w = mw + 10;
     styleObj.h = mh + 10;
@@ -47,8 +45,10 @@ var getPxValue = function (cssValue) {
 
 exports.read = function (config, styleObjList, callback) {
 
-    utilHelper.forEach(styleObjList, function (url, styleObj, next) {
+    var result = styleObjList;
 
+
+    utilHelper.forEach(result, function (url, styleObj, next) {
         var imageInfo, content, image, imageFileName;
 
         if (imageInfo = imageInfoCache[url]) {
@@ -65,12 +65,10 @@ exports.read = function (config, styleObjList, callback) {
             fs.createReadStream(imageFileName)
                 .pipe(new PNG())
                 .on('parsed', function () {
-
                     imageInfo.image = this;
                     imageInfo.width = this.width;
                     imageInfo.height = this.height;
                     getImageSize(this, function (size) {
-                        console.log('getting size: ', size, url);
                         imageInfo.size = size;
                         imageInfoCache[url] = imageInfo;
 
@@ -78,10 +76,18 @@ exports.read = function (config, styleObjList, callback) {
                         setImageWidthHeight(styleObj, imageInfo);
 
                         styleObj.imageInfo = imageInfo;
+
+                        result[url] = styleObj;
+                        
+        console.log(styleObj)
+        console.log('=========================')
+
                         next();
                     });
                 });
         }
 
-    }, callback);
+    }, function(){
+        callback(result)
+    });
 }

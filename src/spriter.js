@@ -28,13 +28,13 @@ var ignoreRepeatRegexp = /^(repeat-x|repeat-y|repeat)$/i;
 var config;
 var sprites = [];
 
-var collectStyleRules = function (css, result) {
+var collectStyleRules = function (css, callback) {
     var filePath = css.path;
     var styleSheet = css.styleSheet;
     var cssRules = styleSheet.cssRules;
 
     if (cssRules.length > 0) {
-        result = result || { length: 0 };
+        var result = { length: 0 };
 
         utilHelper.forEach(
             cssRules,
@@ -61,6 +61,7 @@ var collectStyleRules = function (css, result) {
                     bgItpreter.merge(style);
                     return next();
                 }
+
                 // 显式的使用了平铺的， 也不合并
                 // TODO, 单独合并repeat-x和repeat-y的
                 if (ignoreRepeatRegexp.test(style['background-repeat']) ||
@@ -82,6 +83,7 @@ var collectStyleRules = function (css, result) {
                     }
 
                     imagePath = path.join(config.input, imageUrl);
+
                     if (!fs.existsSync(imagePath)) {
                         // 容错： 如果这个图片是不存在的, 就直接返回
                         return next();
@@ -91,7 +93,10 @@ var collectStyleRules = function (css, result) {
                         filePath,
                         rule,
                         function (spriteReferenceDirective) {
-                            //console.log(spriteReferenceDirective);
+
+                            console.log('--------------------')
+                            //console.log(spriteReferenceDirective)
+                            console.log('--------------------')
 
                             // 把用了同一个文件的样式汇集在一起
                             //if (!result[imageUrl]) {
@@ -101,16 +106,17 @@ var collectStyleRules = function (css, result) {
                                 cssRules: style
                             };
                             result.length++;
+
+                            next();
                         }
                     );
                 }
-
-                next();
+                else {
+                    return next();
+                }
             },
             function (count) {
-                console.log('collectStyleRules ends========: ', result);
-
-                return result;
+                callback(result);
             }
         );
     }
@@ -126,15 +132,16 @@ var getImageUrl = function (backgroundImage) {
 
 var positionImages = function (styleObjList) {
         var styleObjArr = [],
-        arr = [],
-        existArr = [],
-        styleObj,
-        //maxSize = 0,
-        packer = new GrowingPacker();
+            arr = [],
+            existArr = [],
+            styleObj,
+            //maxSize = 0,
+            packer = new GrowingPacker();
 
     // 把已经合并了并已输出的图片先排除掉
     for (var i in styleObjList) {
         styleObj = styleObjList[i];
+
         if (styleObj.imageInfo.hasDrew) {
             existArr.push(styleObj);
         } else {
@@ -178,45 +185,76 @@ var drawImageAndPositionBackground = function (styleObjArr, cssFileName) {
         }
     }
 
-    console.log(styleObjArr.length, cssFileName);
+debugger
 
     utilHelper.forEach(styleObjArr, function (i, arr, next) {
-        // console.log(i);
-        // console.log('-------------------------------');
+        console.log(i);
+        console.log('-------------------------------');
+
         var imageResult = createPng(arr.root.w, arr.root.h);
 
         var imageName = '';
+        var imageUrl = '';
 
         utilHelper.forEach(arr, function (j, styleObj, goon) {
             var imageInfo = styleObj.imageInfo;
 
-            imageName = getImageName(styleObj.url, i, length)
+            // 容错处理
+            if (!styleObj.sprite) { return goon(); }
 
-            replaceAndPositionBackground(imageName, styleObj);
+            imageName = styleObj.sprite['sprite-ref'];
 
-            imageInfo.fit = styleObj.fit;
-            imageInfo.hasDrew = true;
-            imageInfo.imageName = imageName;
+            if (imageName != undefined && imageName != '') {
+                imageUrl = getSpriteImageUrl(imageName);
 
-            debugger
+                console.log(cssFileName, ": ", styleObj.url)
 
-            var image = imageInfo.image;
-            //对图片进行定位和填充
-            image.bitblt(imageResult, 0, 0, image.width, image.height,
-                imageInfo.fit.x, imageInfo.fit.y);
-            goon();
+                replaceAndPositionBackground(imageUrl, styleObj);
+
+                imageInfo.fit = styleObj.fit;
+                imageInfo.hasDrew = true;
+                imageInfo.imageName = imageName;
+
+                debugger
+
+                var image = imageInfo.image;
+                //对图片进行定位和填充
+                image.bitblt(imageResult, 0, 0, image.width, image.height,
+                    imageInfo.fit.x, imageInfo.fit.y);
+                goon();
+            }
         }, function (count) {
             //没必要输出一张空白图片
             debugger;
 
             if (count > 0) {
-                imageName = cssFileName.split('.')[0] + '_sprite.png';
+                var spriteOutImage = '';
+                var imageUrlInfo;
 
+                imageUrlInfo = imageUrl.split('"');
+                if (imageUrlInfo.length == 3){
+                    spriteOutImage = imageUrlInfo[1];
+                }
+                else {
+                    imageUrlInfo = imageUrl.split("'");
 
-                fileHelper.mkdirsSync(path.dirname(imageName));
+                    if (imageUrlInfo.length == 3) {
+                        spriteOutImage = imageUrlInfo[1];
+                    }
+                    else {
+                        // sprite定义名称不正确，直接返回不做处理
+                        return next();
+                    }
+                }
 
-                imageResult.pack().pipe(fs.createWriteStream(imageName));
-                console.log('>>output image:', imageName);
+                spriteOutImage = path.join(config.imageOutput, spriteOutImage);
+
+                console.log(spriteOutImage);
+
+                fileHelper.mkdirsSync(path.dirname(spriteOutImage));
+
+                imageResult.pack().pipe(fs.createWriteStream(spriteOutImage));
+                console.log('>>output image:', spriteOutImage);
             }
             next();
         });
@@ -263,19 +301,29 @@ var getImageName = function (cssFileName, index, total) {
     return config.imageOutput + name + '.png';
 }
 
+var getSpriteImageUrl = function(spriteName){
+    var imageUrl;
+    for (var i = 0; i < sprites.length; i++) {
+        if (sprites[i].sprite == spriteName) {
+            imageUrl = sprites[i]['sprite-image'];
+        }
+    }
+
+    return imageUrl;
+}
+
 var replaceAndPositionBackground = function (imageUrl, styleObj) {
-    for (var i = 0, rule; rule = styleObj.cssRules[i]; i++) {
-        rule['background-image'] = 'url(' + imageUrl + ')';
-        //set background-position-x
-        setPxValue(rule, 'background-position-x', styleObj.fit.x);
+    
+    var cssRules = styleObj.cssRules;
 
-        //set background-position-y
-        setPxValue(rule, 'background-position-y', styleObj.fit.y);
+    if ( cssRules['background-image'] ){
+        cssRules['background-image'] = imageUrl;
 
-        //mergeBackgound, 合并 background 属性, 用于减少代码量
-        bgItpreter.merge(rule);
-        // console.log(rule);
-    };
+        setPxValue( cssRules, 'background-position-x', styleObj.fit.x );
+        setPxValue( cssRules, 'background-position-y', styleObj.fit.y );
+
+        bgItpreter.merge( cssRules );
+    }
 }
 
 /**
@@ -361,26 +409,31 @@ exports.run = function (options) {
                 // 添加当前css文件内新产生的sprite definition(s)
                 addSpriteDefinitions(newSpriteDefinitions);
 
-                var styleObjList = collectStyleRules(css);
+                collectStyleRules(css, function(styleObjList){
 
-                if (!styleObjList.length) {
-                    return next();
-                }
+                    if (!styleObjList.length) {
+                        return next();
+                    }
 
-                delete styleObjList.length;
+                    delete styleObjList.length;
 
-                // 处理此css文件内包含的图片
-                imageHelper.read(config, styleObjList, function () {
+                    // 处理此css文件内包含的图片
+                    imageHelper.read(config, styleObjList, function (result) {
 
-                    var styleObjArr = positionImages(styleObjList);
+                        //console.log(1, '===========', result, '============')
 
-                    //输出合并的图片 并修改样式表里面的background
-                    drawImageAndPositionBackground(styleObjArr, fileName);
+                        delete result.length;
 
-                    //输出修改后的样式表
-                    ss.write(css, './test/output/');
-                    next();
-                });
+                        var styleObjArr = positionImages(result);
+
+                        //输出合并的图片 并修改样式表里面的background
+                        drawImageAndPositionBackground(styleObjArr, fileName);
+
+                        //输出修改后的样式表
+                        ss.write(css, output);
+                        next();
+                    });
+                });   
             });
 
             

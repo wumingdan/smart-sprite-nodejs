@@ -1,22 +1,23 @@
 ﻿var util = require('util');
+var crypto = require('crypto');
 
 exports.is = function (type, obj) {
     var clazz = toString.call(obj).slice(8, -1);
 
     return obj !== undefined && obj !== null && clazz === type;
-}
+};
 
 exports.isString = function (obj) {
     return toString.call(obj) === '[object String]';
-}
+};
 
 exports.isObject = function (obj) {
     return toString.call(obj) === '[object Object]';
-}
+};
 
 exports.jsonParse = function (jsonStr) {
     return Function('return ' + jsonStr)();
-}
+};
 
 exports.forEach = function (array, onEach, onEnd) {
     var keys = null;
@@ -42,4 +43,8 @@ exports.forEach = function (array, onEach, onEnd) {
         onEach && onEach(key, array[key], next);
     };
     next();
-}
+};
+
+exports.md5 = function(text){
+    return crypto.createHash('md5').update(text).digest('hex');
+};
