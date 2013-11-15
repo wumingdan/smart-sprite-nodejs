@@ -79,7 +79,7 @@ exports.read = function (config, styleObjList, callback) {
 
                         result[url] = styleObj;
                         
-        console.log(styleObj)
+        //console.log(styleObj)
         console.log('=========================')
 
                         next();

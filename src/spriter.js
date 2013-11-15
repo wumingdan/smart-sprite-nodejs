@@ -27,6 +27,7 @@ var ignoreRepeatRegexp = /^(repeat-x|repeat-y|repeat)$/i;
 
 var config;
 var sprites = [];
+var stylesheets = [];
 
 var collectStyleRules = function (css, callback) {
     var filePath = css.path;
@@ -131,12 +132,12 @@ var getImageUrl = function (backgroundImage) {
 }
 
 var positionImages = function (styleObjList) {
-        var styleObjArr = [],
-            arr = [],
-            existArr = [],
-            styleObj,
-            //maxSize = 0,
-            packer = new GrowingPacker();
+    var styleObjArr = [],
+        arr = [],
+        existArr = [],
+        styleObj,
+        //maxSize = 0,
+        packer = new GrowingPacker();
 
     // 把已经合并了并已输出的图片先排除掉
     for (var i in styleObjList) {
@@ -168,7 +169,6 @@ var positionImages = function (styleObjList) {
     return styleObjArr;
 }
 
-
 var drawImageAndPositionBackground = function (styleObjArr, cssFileName) {
     var imageInfo;
     var length = styleObjArr.length;
@@ -185,7 +185,7 @@ var drawImageAndPositionBackground = function (styleObjArr, cssFileName) {
         }
     }
 
-debugger
+    debugger
 
     utilHelper.forEach(styleObjArr, function (i, arr, next) {
         console.log(i);
@@ -232,7 +232,7 @@ debugger
                 var imageUrlInfo;
 
                 imageUrlInfo = imageUrl.split('"');
-                if (imageUrlInfo.length == 3){
+                if (imageUrlInfo.length == 3) {
                     spriteOutImage = imageUrlInfo[1];
                 }
                 else {
@@ -301,7 +301,7 @@ var getImageName = function (cssFileName, index, total) {
     return config.imageOutput + name + '.png';
 }
 
-var getSpriteImageUrl = function(spriteName){
+var getSpriteImageUrl = function (spriteName) {
     var imageUrl;
     for (var i = 0; i < sprites.length; i++) {
         if (sprites[i].sprite == spriteName) {
@@ -313,16 +313,16 @@ var getSpriteImageUrl = function(spriteName){
 }
 
 var replaceAndPositionBackground = function (imageUrl, styleObj) {
-    
+
     var cssRules = styleObj.cssRules;
 
-    if ( cssRules['background-image'] ){
+    if (cssRules['background-image']) {
         cssRules['background-image'] = imageUrl;
 
-        setPxValue( cssRules, 'background-position-x', styleObj.fit.x );
-        setPxValue( cssRules, 'background-position-y', styleObj.fit.y );
+        setPxValue(cssRules, 'background-position-x', styleObj.fit.x);
+        setPxValue(cssRules, 'background-position-y', styleObj.fit.y);
 
-        bgItpreter.merge( cssRules );
+        bgItpreter.merge(cssRules);
     }
 }
 
@@ -385,7 +385,6 @@ exports.run = function (options) {
 
     var cssObjects = [];
     var spriteImages = [];
-    var stylesheets = [];
     var combinedStyleObjList = { length: 0 };
 
     utilHelper.forEach(
@@ -404,12 +403,12 @@ exports.run = function (options) {
             var content = ss.read(filePath);
 
             // 获取是否新增sprite-image
-            ss.getSpriteDefinitions(filePath, function(newSpriteDefinitions){
+            ss.getSpriteDefinitions(filePath, function (newSpriteDefinitions) {
 
                 // 添加当前css文件内新产生的sprite definition(s)
                 addSpriteDefinitions(newSpriteDefinitions);
 
-                collectStyleRules(css, function(styleObjList){
+                collectStyleRules(css, function (styleObjList) {
 
                     if (!styleObjList.length) {
                         return next();
@@ -419,26 +418,49 @@ exports.run = function (options) {
 
                     // 处理此css文件内包含的图片
                     imageHelper.read(config, styleObjList, function (result) {
-
-                        //console.log(1, '===========', result, '============')
-
                         delete result.length;
 
-                        var styleObjArr = positionImages(result);
+                        /**
+                         * {
+                         *     path: 'test\css\base.css',
+                         *     data: { image-path: {cssRules, w, h, imageInfo, url, sprint} }
+                         * }
+                         */
+                        stylesheets.push({
+                            'path': filePath,
+                            'data': result
+                        });
+
+                        //var styleObjArr = positionImages(result);
 
                         //输出合并的图片 并修改样式表里面的background
-                        drawImageAndPositionBackground(styleObjArr, fileName);
+                        //drawImageAndPositionBackground(styleObjArr, fileName);
 
                         //输出修改后的样式表
-                        ss.write(css, output);
+                        //ss.write(css, output);
                         next();
                     });
-                });   
+                });
             });
 
-            
+
         },
         function () {
+            // 处理完所有css文件
+            // 得到 sprits 和 stylesheets 2个数组
+            // sprites: css 文件中定义的 sprite 信息
+            // stylesheets: css 文件和 此 css 文件中需要做合并的图片信息
+
+            // 处理 stylesheets 数组中每个 css 文件
+            for (var i = 0; i < stylesheets.length; i++) {
+                var stylesheet = stylesheets[i];
+
+                var path = stylesheet.path;
+                var data = stylesheet.data;
+
+
+            }
+
             //console.log('fuck: ', sprites);
         }
     );

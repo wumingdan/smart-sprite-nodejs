@@ -98,7 +98,13 @@ exports.getSpriteDefinitions = function (filePath, callback) {
 
     rd.on('line', function (line) {
         if (spriteDefineReg.test(line)) {
-            result.push(parseDirectives(line));
+            var result = parseDirectives(line);
+
+            if (result && result['sprite-image'] != undefined) {
+                var url = result['sprite-image']
+            }
+
+            result.push();
         }
     });
 
