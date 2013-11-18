@@ -24,5 +24,9 @@ exports.parse = function (options) {
         config.output = config.input;
     }
 
+    if (!config.margin) {
+        config.margin = [0, 0, 20, 0];
+    }
+
     return config;
 }

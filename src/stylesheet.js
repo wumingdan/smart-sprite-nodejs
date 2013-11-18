@@ -88,7 +88,7 @@ exports.getCssRules = function (filePath) {
  * return: array of spriteImageNames
  */
 exports.getSpriteDefinitions = function (filePath, callback) {
-    var result = [];
+    var results = [];
 
     var rd = readline.createInterface({
         input: fs.createReadStream(filePath),
@@ -101,15 +101,29 @@ exports.getSpriteDefinitions = function (filePath, callback) {
             var result = parseDirectives(line);
 
             if (result && result['sprite-image'] != undefined) {
-                var url = result['sprite-image']
+                var url = result['sprite-image'];
+
+                var items;
+
+                items = url.split('"');
+
+                if (items.length != 3) {
+                    items = url.split("'");
+                }
+
+                if (items.length != 3) {
+                    console.warn('warn', 'sprite定义不正确');
+                }
+
+                result.__url = items[1].trim();
             }
 
-            result.push();
+            results.push(result);
         }
     });
 
     rd.on('close', function(){
-        callback(result);
+        callback(results);
     });  
 }
 

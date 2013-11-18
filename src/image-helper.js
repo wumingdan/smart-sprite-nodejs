@@ -3,6 +3,8 @@ var fs = require('fs');
 
 var PNG = require('pngjs').PNG;
 
+var im = require('imagemagick');
+
 var utilHelper = require('./util-helper');
 
 var imageInfoCache = {};
@@ -78,16 +80,29 @@ exports.read = function (config, styleObjList, callback) {
                         styleObj.imageInfo = imageInfo;
 
                         result[url] = styleObj;
-                        
-        //console.log(styleObj)
-        console.log('=========================')
+
+                        //console.log(styleObj)
+                        console.log('=========================')
 
                         next();
                     });
                 });
         }
 
-    }, function(){
+    }, function () {
         callback(result)
     });
-}
+};
+
+exports.expand = function (img, expands) {
+    var top = expands[0];
+    var right = expands[1];
+    var bottom = expands[2];
+    var left = expands[3];
+
+    if (top > 0) {
+        // http://www.imagemagick.org/Usage/crop/#extent
+
+    }
+
+};

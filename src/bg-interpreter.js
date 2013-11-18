@@ -183,7 +183,34 @@
         style[style.length++] = 'background';
     };
 
-    //exports.getBgUrl = function (backgroundImage) {
-        
-    //};
+    exports.getMarginInfo = function (spriteInfo) {
+        var result = [0, 0, 0, 0];
+
+        var marginTop, marginRight, marginBottom, marginLeft;
+
+        if (spriteInfo != undefined) {
+            marginTop = spriteInfo['sprite-margin-top'];
+            marginRight = spriteInfo['sprite-margin-right'];
+            marginBottom = spriteInfo['sprite-margin-bottom'];
+            marginLeft = spriteInfo['sprite-margin-left'];
+
+            if (marginTop) {
+                result[0] = parseInt(marginTop);
+            }
+
+            if (marginRight) {
+                result[1] = parseInt(marginRight);
+            }
+
+            if (marginBottom) {
+                result[2] = parseInt(marginBottom);
+            }
+
+            if (marginLeft) {
+                result[3] = parseInt(marginLeft);
+            }
+        }
+
+        return result;
+    };
 })();
