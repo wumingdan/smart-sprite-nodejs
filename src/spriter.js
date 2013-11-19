@@ -9,8 +9,6 @@ var PNG = require('pngjs').PNG;
 var im = require('imagemagick');
 var uuid = require('node-uuid');
 
-var GrowingPacker = require('./GrowingPacker');
-
 var configParser = require('./config-parser');
 var fileHelper = require('./file-helper');
 var utilHelper = require('./util-helper');
