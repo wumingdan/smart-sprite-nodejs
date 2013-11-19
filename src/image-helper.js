@@ -1,11 +1,13 @@
 ﻿
 var fs = require('fs');
+var path = require('path');
 
 var PNG = require('pngjs').PNG;
 
 var im = require('imagemagick');
 
 var utilHelper = require('./util-helper');
+var fileHelper = require('./file-helper');
 
 var imageInfoCache = {};
 
@@ -45,64 +47,118 @@ var getPxValue = function (cssValue) {
     return 0;
 }
 
+var expandOnce = function (src, dest, type, expand, callback) {
+    im.convert(
+        [
+            src,
+            '-background', 'transparent',
+            '-gravity', type,
+            '-extent', expand,
+            dest
+        ],
+        function (err, stdout) {
+            if (err) {
+                // TODO
+                throw err;
+            };
+
+            callback();
+        }
+    );
+};
+
 exports.read = function (config, styleObjList, callback) {
 
     var result = styleObjList;
 
-
-    utilHelper.forEach(result, function (url, styleObj, next) {
+    utilHelper.forEach(result, function (token, styleObj, next) {
         var imageInfo, content, image, imageFileName;
 
-        if (imageInfo = imageInfoCache[url]) {
-            // 从所有style里面，选取图片宽高最大的作为图片宽高
-            setImageWidthHeight(styleObj, imageInfo);
+        var url = styleObj.url;
 
-            styleObj.imageInfo = imageInfo;
-            next();
-        } else {
-            imageFileName = config.input + url;
+        imageFileName = config.input + url;
 
-            imageInfo = {};
+        imageInfo = {};
 
-            fs.createReadStream(imageFileName)
-                .pipe(new PNG())
-                .on('parsed', function () {
-                    imageInfo.image = this;
-                    imageInfo.width = this.width;
-                    imageInfo.height = this.height;
-                    getImageSize(this, function (size) {
-                        imageInfo.size = size;
-                        imageInfoCache[url] = imageInfo;
+        fs.createReadStream(imageFileName)
+            .pipe(new PNG())
+            .on('parsed', function () {
+                imageInfo.image = this;
+                imageInfo.width = this.width;
+                imageInfo.height = this.height;
+                getImageSize(this, function (size) {
+                    imageInfo.size = size;
+                    imageInfoCache[url] = imageInfo;
 
-                        // 从所有style里面，选取图片宽高最大的作为图片宽高
-                        setImageWidthHeight(styleObj, imageInfo);
+                    // 从所有style里面，选取图片宽高最大的作为图片宽高
+                    setImageWidthHeight(styleObj, imageInfo);
 
-                        styleObj.imageInfo = imageInfo;
+                    styleObj.imageInfo = imageInfo;
 
-                        result[url] = styleObj;
+                    result[token] = styleObj;
 
-                        //console.log(styleObj)
-                        console.log('=========================')
-
-                        next();
-                    });
+                    next();
                 });
-        }
+            });
 
     }, function () {
         callback(result)
     });
 };
 
-exports.expand = function (img, expands) {
+exports.expand = function (config, img, expands, callback) {
+    var workingdir = config.workingdir
+        || path.resolve((config.imageOutput || config.output), '/tmp/');
+
     var top = expands[0];
     var right = expands[1];
     var bottom = expands[2];
     var left = expands[3];
 
-    if (top > 0) {
-        // http://www.imagemagick.org/Usage/crop/#extent
+    var src = img.imgUrl;
+    var align = img.align || 'left';    // TODO
+    var width = img.width;
+    var height = img.height;
 
+    // http://www.imagemagick.org/Usage/crop/#extent
+    var expandTop = width + 'x' + (height + top);
+    var expandRight = (width + right) + 'x' + (height + top);
+    var expandBottom = (width + right) + 'x' + (height + top + bottom);
+    var expandLeft = (width + right + left) + 'x' + (height + top + bottom);
+
+    debugger;
+
+    if (!fs.existsSync(workingdir)) {
+        fileHelper.mkdirsSync(workingdir);
     }
 
+    var dest = path.resolve(workingdir, img.uuid + '.png');
+
+    expandOnce(src, dest, 'south', expandTop, function () {
+        expandOnce(dest, dest, 'west', expandRight, function () {
+            expandOnce(dest, dest, 'north', expandBottom, function () {
+                expandOnce(dest, dest, 'east', expandLeft, function () {
+                    console.log('done expand');
+                    callback();
+                });
+            });
+        });
+    });
+
 };
+
+exports.montage = function (imgs, output) {
+    imgs.push('-background');
+    imgs.push('transparent');
+    imgs.push('-append');
+    imgs.push(output);
+
+    im.convert(imgs);
+};
+
+//this.expand({
+//    'imgUrl': 'test/css/decorator/os_icons/ios.png',
+//    width: 100,
+//    height: 100
+//    },
+//[10, 10, 100, 10], function () { })

@@ -9,6 +9,7 @@
         "cssom": "~0.2.5",
         "pngjs": "~0.4.0",
         "commander": "~2.0.0",
-        "imagemagick": "http://github.com/msealand/node-imagemagick.git"
+        "node-uuid": "~1.4.1",
+        "imagemagick": "~0.1.3"
     }
 }

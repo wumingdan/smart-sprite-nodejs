@@ -1,5 +1,6 @@
 ﻿{
     'input': 'test/css/',
     'output': 'test/output/',
-    'imageOutput': 'test/output/'
+    'imageOutput': 'test/output/',
+    'workingdir': 'test/tmp/'
 }

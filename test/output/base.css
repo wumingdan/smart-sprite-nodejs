@@ -1,3 +1,4 @@
 .header-wrapper .view-tab {margin-left: 150px; float: left; _display: inline;}
-.header-wrapper .view-tab a {width: 85px; height: 26px; line-height: 26px; display: inline-block; color: White; font-weight: bolder; margin-right: 3px; background: url('decorator/common-890f98a1a2684f2e53e657142a034cc0.png') 0 -36px no-repeat;}
-.header-wrapper .view-tab a.site-center {width: 96px; background: url('decorator/common-890f98a1a2684f2e53e657142a034cc0.png') 0 0 no-repeat;}
+.header-wrapper .view-tab a {width: 85px; height: 26px; line-height: 26px; display: inline-block; color: White; font-weight: bolder; margin-right: 3px; background: url('decorator/common-890f98a1a2684f2e53e657142a034cc0.png') 0 -186px no-repeat;}
+.header-wrapper .view-tab a.site-center {width: 96px; background: url('decorator/common-890f98a1a2684f2e53e657142a034cc0.png') 0 -140px no-repeat;}
+.header-wrapper .view-tab a.bulb {color: red; width: 96px; padding-left: 13px; background: url('decorator/common-890f98a1a2684f2e53e657142a034cc0.png') 0 -232px no-repeat;}

@@ -15,17 +15,20 @@
     margin-right: 3px;
     background-position: 0 0;
     background-repeat: no-repeat;
-    background-image: url("decorator/view_tab.png");/** sprite-ref: common;sprite-margin-bottom:1px;*/ 
+    background-image: url("decorator/view_tab.png");/** sprite-ref: common;sprite-margin-bottom:20px;*/ 
 }
 .header-wrapper .view-tab a.site-center{
     width: 96px;
     background-position: 0 0;
     background-repeat: no-repeat;
-    background-image: url("decorator/view_tab_site_center.png");/** sprite-ref: common;sprite-margin-bottom:2px;*/ 
+    background-image: url("decorator/view_tab_site_center.png");/** sprite-ref: common;sprite-margin-top:20px;*/ 
 }
 
-/*.header-wrapper .view-tab a.site-center{
+.header-wrapper .view-tab a.bulb{
+    color: red;
     width: 96px;
+    padding-left: 13px;
     background-position: 0 0;
     background-repeat: no-repeat;
-    background-image: url("decorator/view_tab_site_center.png");/** sprite-ref: common;sprite-margin-bottom:2px;*/ 
+    background-image: url("decorator/bulb.png");/** sprite-ref: common;sprite-margin-bottom:300px;*/
+}
