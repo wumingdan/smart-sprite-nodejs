@@ -1,10 +1,7 @@
 ﻿{
-    "name": "hm-sprite",
-    "description": "sprite tool - holmes",
+    "name": "smart-sprite-nodejs",
+    "description": "smart-sprite-nodejs",
     "version": "0.0.0",
-    "author": {
-        "name": "holmes fe"
-    },
     "devDependencies": {
         "cssom": "~0.2.5",
         "pngjs": "~0.4.0",
